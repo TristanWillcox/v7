@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
     import { useParams } from 'react-router-dom';
-    import { Users, MessageSquare, Calendar, Link as LinkIcon, Settings, Music2, Paintbrush, BookOpen, Video, ArrowUp } from 'lucide-react';
+    import { Users, MessageSquare, Calendar, Link as LinkIcon, Settings, Music2, Paintbrush, BookOpen, Video, ArrowUp, UserPlus, Check } from 'lucide-react';
     import { useProject } from '../contexts/ProjectContext';
 
     type Tab = 'overview' | 'hangout' | 'team' | 'contributions' | 'board';
@@ -17,6 +17,9 @@ import React, { useState } from 'react';
       ]);
       const project = projects.find(p => p.id === Number(id));
       const [newMessage, setNewMessage] = useState('');
+      const [isJoined, setIsJoined] = useState(false);
+      const [isOwner, setIsOwner] = useState(true);
+      const [teamMembers, setTeamMembers] = useState<string[]>([]);
 
       if (!project) return <div>Project not found</div>;
 
@@ -50,6 +53,16 @@ import React, { useState } from 'react';
         setMessages(messages.map(msg =>
           msg.id === messageId ? { ...msg, votes: msg.votes + 1 } : msg
         ));
+      };
+
+      const handleJoinProject = () => {
+        setIsJoined(true);
+        setTeamMembers(prevMembers => [...prevMembers, 'New User']);
+        setIsOwner(false);
+      };
+
+      const handleBecomeOwner = () => {
+        setIsOwner(true);
       };
 
       return (
@@ -194,7 +207,11 @@ import React, { useState } from 'react';
                     }}
                   >
                     <h2 className="text-xl font-light mb-4">Project Team</h2>
-                    <p className="text-zinc-400">This is the team section of the project. You can add more details here.</p>
+                    <ul className="list-disc list-inside text-zinc-400">
+                      {teamMembers.map((member, index) => (
+                        <li key={index}>{member}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               )}
@@ -344,12 +361,49 @@ import React, { useState } from 'react';
                   borderColor: activeColor ? `rgba(${activeColor}, 0.2)` : undefined
                 }}
               >
-                <h2 className="text-xl font-light mb-4">Project Settings</h2>
-                <button className="flex items-center gap-2 text-zinc-400 hover:text-white">
-                  <Settings className="h-4 w-4" />
-                  Manage Project
+                <button
+                  onClick={handleJoinProject}
+                  className={`w-full flex items-center justify-center gap-2 text-white rounded-lg p-2 transition-colors duration-700 ${
+                    isJoined ? 'bg-green-500 hover:bg-green-600' : 'bg-zinc-700 hover:bg-zinc-600'
+                  }`}
+                >
+                  {isJoined ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Joined
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="h-4 w-4" />
+                      Join Project
+                    </>
+                  )}
                 </button>
               </div>
+
+              {!isOwner && (
+                <button
+                  onClick={handleBecomeOwner}
+                  className="bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg p-2 transition-colors duration-700"
+                >
+                  Become Owner
+                </button>
+              )}
+
+              {isOwner && (
+                <div
+                  className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800"
+                  style={{
+                    borderColor: activeColor ? `rgba(${activeColor}, 0.2)` : undefined
+                  }}
+                >
+                  <h2 className="text-xl font-light mb-4">Project Settings</h2>
+                  <button className="flex items-center gap-2 text-zinc-400 hover:text-white">
+                    <Settings className="h-4 w-4" />
+                    Manage Project
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

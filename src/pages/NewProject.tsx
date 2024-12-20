@@ -22,10 +22,14 @@ import React, { useState } from 'react';
         coverImage: '',
         audioUrl: '',
         videoUrl: '',
-        invitedUsers: []
+        invitedUsers: [],
+        goals: [''],
+        deadlines: ['']
       });
       const [disciplineInput, setDisciplineInput] = useState('');
       const [inviteUserInput, setInviteUserInput] = useState('');
+      const [goalInput, setGoalInput] = useState('');
+      const [deadlineInput, setDeadlineInput] = useState('');
 
       const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -73,6 +77,40 @@ import React, { useState } from 'react';
         setFormData({
           ...formData,
           invitedUsers: formData.invitedUsers.filter(user => user !== userToRemove)
+        });
+      };
+
+      const handleAddGoal = () => {
+        if (goalInput.trim()) {
+          setFormData({
+            ...formData,
+            goals: [...formData.goals, goalInput.trim()]
+          });
+          setGoalInput('');
+        }
+      };
+
+      const handleRemoveGoal = (indexToRemove: number) => {
+        setFormData({
+          ...formData,
+          goals: formData.goals.filter((_, index) => index !== indexToRemove)
+        });
+      };
+
+      const handleAddDeadline = () => {
+        if (deadlineInput.trim()) {
+          setFormData({
+            ...formData,
+            deadlines: [...formData.deadlines, deadlineInput.trim()]
+          });
+          setDeadlineInput('');
+        }
+      };
+
+      const handleRemoveDeadline = (indexToRemove: number) => {
+        setFormData({
+          ...formData,
+          deadlines: formData.deadlines.filter((_, index) => index !== indexToRemove)
         });
       };
 
@@ -230,6 +268,90 @@ import React, { useState } from 'react';
                 </div>
               </div>
             )}
+
+            <div
+              className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800"
+              style={{
+                borderColor: activeColor ? `rgba(${activeColor}, 0.2)` : undefined
+              }}
+            >
+              <h2 className="text-xl font-light mb-4">Project Goals</h2>
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  value={goalInput}
+                  onChange={(e) => setGoalInput(e.target.value)}
+                  className="flex-1 bg-zinc-800 border-0 rounded-lg px-4 py-2 focus:ring-1 focus:ring-white"
+                  placeholder="Enter goal"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddGoal}
+                  className="bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg p-2 transition-colors duration-700"
+                >
+                  <Plus className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {formData.goals.map((goal, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 text-zinc-300 text-sm font-light tracking-wider transition-colors duration-700 rounded-full bg-zinc-800"
+                  >
+                    {goal}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveGoal(index)}
+                      className="ml-1 text-zinc-500 hover:text-zinc-400"
+                    >
+                      x
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800"
+              style={{
+                borderColor: activeColor ? `rgba(${activeColor}, 0.2)` : undefined
+              }}
+            >
+              <h2 className="text-xl font-light mb-4">Project Deadlines</h2>
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  value={deadlineInput}
+                  onChange={(e) => setDeadlineInput(e.target.value)}
+                  className="flex-1 bg-zinc-800 border-0 rounded-lg px-4 py-2 focus:ring-1 focus:ring-white"
+                  placeholder="Enter deadline"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddDeadline}
+                  className="bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg p-2 transition-colors duration-700"
+                >
+                  <Plus className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {formData.deadlines.map((deadline, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 text-zinc-300 text-sm font-light tracking-wider transition-colors duration-700 rounded-full bg-zinc-800"
+                  >
+                    {deadline}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDeadline(index)}
+                      className="ml-1 text-zinc-500 hover:text-zinc-400"
+                    >
+                      x
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
 
             {selectedType === 'music' && (
               <div
