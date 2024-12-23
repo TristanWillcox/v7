@@ -14,7 +14,6 @@ import React, { useRef, useEffect, useState } from 'react';
       onHover: () => void;
       onLeave: () => void;
       isActive: boolean;
-      font: string;
       duration?: string;
       progress?: number;
     }
@@ -31,7 +30,6 @@ import React, { useRef, useEffect, useState } from 'react';
       onHover,
       onLeave,
       isActive,
-      font,
       duration,
       progress
     }: ProjectCardProps) {
@@ -41,6 +39,7 @@ import React, { useRef, useEffect, useState } from 'react';
       const [audioData, setAudioData] = useState<number[]>([]);
       const animationFrameRef = useRef<number>();
       const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+      const [isHovered, setIsHovered] = useState(false);
 
       useEffect(() => {
         let mounted = true;
@@ -146,8 +145,14 @@ import React, { useRef, useEffect, useState } from 'react';
             borderColor: isActive ? `rgba(${color}, 0.3)` : '',
             backgroundColor: isActive ? `rgba(${color}, 0.05)` : '',
           }}
-          onMouseEnter={onHover}
-          onMouseLeave={onLeave}
+          onMouseEnter={() => {
+            onHover();
+            setIsHovered(true);
+          }}
+          onMouseLeave={() => {
+            onLeave();
+            setIsHovered(false);
+          }}
         >
           <div className="relative">
             <img
@@ -165,45 +170,60 @@ import React, { useRef, useEffect, useState } from 'react';
               }}
             ></div>
           </div>
-          <div className="p-6 space-y-4">
-            <h3 className={`text-xl tracking-wider transition-all duration-700 ${isActive ? font : ''}`}>
-              {title}
-            </h3>
-            <p className={`text-zinc-400 text-sm transition-all duration-700 ${isActive ? font : ''}`}>
-              {description}
-            </p>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-zinc-400">
-                <Users className="h-5 w-5" />
-                <span className="text-sm">{collaborators} collaborators</span>
-              </div>
-              <div className="flex gap-2">
-                {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3 py-1 text-zinc-300 text-sm font-light tracking-wider transition-colors duration-700 rounded-full"
-                    style={{
-                      backgroundColor: isActive ? `rgba(${color}, 0.1)` : 'rgb(39, 39, 42)',
-                    }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+          <div className="p-6 space-y-4 flex flex-col">
+            <div>
+              <h3 className="text-xl tracking-wider">
+                {title}
+              </h3>
+              <p className="text-zinc-400 text-sm">
+                {description}
+              </p>
             </div>
-            {duration && (
-              <div className="text-zinc-400 text-sm">
-                Duration: {duration}
+            <div
+              className={`overflow-hidden transition-all duration-500 ${isHovered ? 'max-h-96' : 'max-h-0'}`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <Users className="h-5 w-5" />
+                  <span className="text-sm">{collaborators} collaborators</span>
+                </div>
+                <div className="flex gap-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 text-zinc-300 text-sm font-light tracking-wider transition-colors duration-700 rounded-full"
+                      style={{
+                        backgroundColor: isActive ? `rgba(${color}, 0.1)` : 'rgb(39, 39, 42)',
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-            )}
-            {progress !== undefined && (
-              <div className="w-full bg-zinc-700 rounded-full h-2.5">
-                <div
-                  className="bg-green-500 h-2.5 rounded-full"
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-            )}
+              {duration && (
+                <div className="text-zinc-400 text-sm">
+                  Duration: {duration}
+                </div>
+              )}
+              {progress !== undefined && (
+                <div className="w-full bg-zinc-700 rounded-full h-2.5">
+                  <div
+                    className="h-2.5 rounded-full"
+                    style={{
+                      width: `${progress}%`,
+                      backgroundColor: isActive ? `rgb(${color})` : 'rgb(156, 163, 175)',
+                    }}
+                  ></div>
+                </div>
+              )}
+            </div>
+          </div>
+        </Link>
+      );
+    }
+       )}
+            </div>
           </div>
         </Link>
       );
