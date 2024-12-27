@@ -37,6 +37,19 @@ import React, { useState } from 'react';
       isMuted: boolean;
     }
 
+    interface StoryElement {
+      id: number;
+      originalText: string;
+      contributions: { userId: number; userName: string; text: string }[];
+    }
+
+    interface VisualAsset {
+      id: number;
+      userId: number;
+      userName: string;
+      assetUrl: string;
+    }
+
     export function Project() {
       const { id } = useParams();
       const navigate = useNavigate();
@@ -84,6 +97,41 @@ import React, { useState } from 'react';
           audioUrl: '',
           volume: 1,
           isMuted: false,
+        },
+      ]);
+
+      const [storyElements, setStoryElements] = useState<StoryElement[]>([
+        {
+          id: 1,
+          originalText: 'The quick brown [animal] jumps over the lazy [animal].',
+          contributions: [
+            { userId: 1, userName: 'User 1', text: 'fox' },
+            { userId: 2, userName: 'User 2', text: 'dog' },
+          ],
+        },
+        {
+          id: 2,
+          originalText: 'In a [place], there lived a [person].',
+          contributions: [
+            { userId: 1, userName: 'User 1', text: 'forest' },
+            { userId: 2, userName: 'User 2', text: 'wizard' },
+          ],
+        },
+      ]);
+      const [newContribution, setNewContribution] = useState('');
+
+      const [visualAssets, setVisualAssets] = useState<VisualAsset[]>([
+        {
+          id: 1,
+          userId: 1,
+          userName: 'User 1',
+          assetUrl: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&q=80',
+        },
+        {
+          id: 2,
+          userId: 2,
+          userName: 'User 2',
+          assetUrl: 'https://images.unsplash.com/photo-1515462250-33bd709cbe85?auto=format&fit=crop&q=80',
         },
       ]);
 
@@ -178,6 +226,22 @@ import React, { useState } from 'react';
         console.log('Add Track clicked');
       };
 
+      const handleAddContribution = (elementId: number) => {
+        if (newContribution.trim()) {
+          setStoryElements(prevElements =>
+            prevElements.map(element =>
+              element.id === elementId ? { ...element, contributions: [...element.contributions, { userId: Date.now(), userName: 'CurrentUser', text: newContribution }] } : element
+            )
+          );
+          setNewContribution('');
+        }
+      };
+
+      const handleAddVisualAsset = () => {
+        // Placeholder for adding a new visual asset
+        console.log('Add Visual Asset clicked');
+      };
+
       return (
         <div className="space-y-8">
           <div className="relative h-64 rounded-xl overflow-hidden">
@@ -229,9 +293,7 @@ import React, { useState } from 'react';
             <button
               onClick={handleJoinProject}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-700 ${
-                isJoined
-                  ? 'bg-green-500 hover:bg-green-600 text-white'
-                  : 'bg-zinc-700 hover:bg-zinc-600 text-white'
+                isJoined ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-zinc-700 hover:bg-zinc-600 text-white'
               }`}
             >
               {isJoined ? (
@@ -246,6 +308,17 @@ import React, { useState } from 'react';
                 </>
               )}
             </button>
+            {isOwner && (
+              <button
+                onClick={handleOpenModal}
+                className="px-3 py-1 rounded-lg flex items-center gap-2 transition-colors duration-700 text-sm"
+                style={{
+                  backgroundColor: activeColor ? `rgba(${activeColor}, 0.1)` : 'rgba(255, 255, 255, 0.05)',
+                }}
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
           {activeTab === 'contributions' && (
@@ -282,28 +355,15 @@ import React, { useState } from 'react';
             {/* Overview Tab Content */}
             {activeTab === 'overview' && (
               <div
-                className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800"
+                className="bg-zinc-900/50 rounded-xl p-6 border border-zinc-800 relative"
                 style={{
                   borderColor: activeColor
                     ? `rgba(${activeColor}, 0.2)`
                     : undefined,
                 }}
               >
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4">
                   <h2 className="text-xl font-light">Project Overview</h2>
-                  {isOwner && (
-                    <button
-                      onClick={handleOpenModal}
-                      className="px-3 py-1 rounded-lg flex items-center gap-2 transition-colors duration-700 text-sm"
-                      style={{
-                        backgroundColor: activeColor
-                          ? `rgba(${activeColor}, 0.1)`
-                          : 'rgba(255, 255, 255, 0.05)',
-                      }}
-                    >
-                      <Settings className="h-4 w-4" />
-                    </button>
-                  )}
                 </div>
                 <div className="flex flex-col space-y-2">
                   {project.milestones.map((milestone, idx) => (
@@ -429,13 +489,37 @@ import React, { useState } from 'react';
                     }}
                   >
                     <h2 className="text-xl font-light mb-4">Visual Assets</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div
-                          key={i}
-                          className="aspect-video bg-zinc-800 rounded-lg animate-pulse"
-                        ></div>
-                      ))}
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-lg font-light mb-2">
+                          Base Visual
+                        </h3>
+                        <div className="w-full h-48 bg-zinc-800 rounded"></div>
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-light mb-2">
+                          Visual Assets
+                        </h3>
+                        {visualAssets.map((asset) => (
+                          <div
+                            key={asset.id}
+                            className="flex items-center justify-between p-2 border border-zinc-800 rounded-lg"
+                          >
+                            <span className="text-zinc-300">
+                              {asset.userName}
+                            </span>
+                            <div className="w-48 h-10 bg-zinc-800 rounded">
+                              <img src={asset.assetUrl} alt="Visual Asset" className="w-full h-full object-cover rounded" />
+                            </div>
+                            <div className="flex gap-2">
+                              <button className="text-zinc-400 hover:text-white">
+                                <PlusCircle className="h-5 w-5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <button onClick={handleAddVisualAsset} className="px-4 py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-white transition-colors duration-700">Add Visual Asset</button>
                     </div>
                   </div>
                 )}
@@ -505,13 +589,33 @@ import React, { useState } from 'react';
                   >
                     <h2 className="text-xl font-light mb-4">Story Elements</h2>
                     <div className="space-y-4">
-                      {[1, 2].map((i) => (
-                        <div key={i} className="p-4 bg-zinc-800/50 rounded-lg">
-                          <div className="h-4 w-1/4 bg-zinc-700 rounded mb-2"></div>
-                          <div className="space-y-2">
-                            <div className="h-2 w-full bg-zinc-700 rounded"></div>
-                            <div className="h-2 w-5/6 bg-zinc-700 rounded"></div>
-                            <div className="h-2 w-4/6 bg-zinc-700 rounded"></div>
+                      {storyElements.map((element) => (
+                        <div key={element.id} className="p-4 bg-zinc-800/50 rounded-lg">
+                          <p className="text-zinc-400">
+                            {element.originalText.split(/\[.*?\]/).map((text, index, array) => {
+                              const match = element.originalText.match(/\[(.*?)\]/g)?.[index];
+                              if (match) {
+                                const contributions = element.contributions.filter(c => c.userName === 'CurrentUser');
+                                const contribution = contributions.length > 0 ? contributions[contributions.length - 1].text : null;
+                                return (
+                                  <React.Fragment key={index}>
+                                    {text}
+                                    <span className="text-white">{contribution || match.slice(1, -1)}</span>
+                                  </React.Fragment>
+                                );
+                              }
+                              return text;
+                            })}
+                          </p>
+                          <div className="flex gap-2 mt-4">
+                            <input
+                              type="text"
+                              value={newContribution}
+                              onChange={(e) => setNewContribution(e.target.value)}
+                              className="flex-1 bg-zinc-800 border-0 rounded-lg px-4 py-2 focus:ring-1 focus:ring-white"
+                              placeholder="Add a contribution..."
+                            />
+                            <button onClick={() => handleAddContribution(element.id)} className="bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg p-2 transition-colors duration-700">Add</button>
                           </div>
                         </div>
                       ))}
