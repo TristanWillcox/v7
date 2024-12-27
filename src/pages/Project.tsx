@@ -16,6 +16,7 @@ import React, { useState } from 'react';
       Edit2,
       Trash2,
       PlusCircle,
+      GitFork,
     } from 'lucide-react';
     import { useProject } from '../contexts/ProjectContext';
 
@@ -79,6 +80,8 @@ import React, { useState } from 'react';
               isPublic: true,
             },
       );
+      const [showBranchModal, setShowBranchModal] = useState(false);
+      const [newBranchName, setNewBranchName] = useState('');
 
       // Placeholder tracks for now
       const [tracks, setTracks] = useState<Track[]>([
@@ -242,6 +245,30 @@ import React, { useState } from 'react';
         console.log('Add Visual Asset clicked');
       };
 
+      const handleBranchProject = () => {
+        setShowBranchModal(true);
+      };
+
+      const handleConfirmBranch = () => {
+        if (newBranchName.trim() && project) {
+          const branchedProject = {
+            ...project,
+            id: Date.now(),
+            title: newBranchName,
+            parentProjectId: project.id,
+          };
+          addProject(branchedProject);
+          setNewBranchName('');
+          setShowBranchModal(false);
+          navigate(`/project/${branchedProject.id}`);
+        }
+      };
+
+      const handleCancelBranch = () => {
+        setNewBranchName('');
+        setShowBranchModal(false);
+      };
+
       return (
         <div className="space-y-8">
           <div className="relative h-64 rounded-xl overflow-hidden">
@@ -309,15 +336,27 @@ import React, { useState } from 'react';
               )}
             </button>
             {isOwner && (
-              <button
-                onClick={handleOpenModal}
-                className="px-3 py-1 rounded-lg flex items-center gap-2 transition-colors duration-700 text-sm"
-                style={{
-                  backgroundColor: activeColor ? `rgba(${activeColor}, 0.1)` : 'rgba(255, 255, 255, 0.05)',
-                }}
-              >
-                <Settings className="h-4 w-4" />
-              </button>
+              <>
+                <button
+                  onClick={handleOpenModal}
+                  className="px-3 py-1 rounded-lg flex items-center gap-2 transition-colors duration-700 text-sm"
+                  style={{
+                    backgroundColor: activeColor ? `rgba(${activeColor}, 0.1)` : 'rgba(255, 255, 255, 0.05)',
+                  }}
+                >
+                  <Settings className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={handleBranchProject}
+                  className="px-3 py-1 rounded-lg flex items-center gap-2 transition-colors duration-700 text-sm"
+                  style={{
+                    backgroundColor: activeColor ? `rgba(${activeColor}, 0.1)` : 'rgba(255, 255, 255, 0.05)',
+                  }}
+                >
+                  <GitFork className="h-4 w-4" />
+                  Branch
+                </button>
+              </>
             )}
           </div>
 
@@ -688,7 +727,7 @@ import React, { useState } from 'react';
               </button>
             )}
 
-            {/* Modal */}
+            {/* Project Settings Modal */}
             {showModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                 <div className="bg-zinc-900 rounded-xl p-6 w-full max-w-lg space-y-4">
@@ -744,6 +783,41 @@ import React, { useState } from 'react';
                       className="px-4 py-2 rounded-lg bg-white text-black hover:bg-zinc-200"
                     >
                       Save Changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Branch Project Modal */}
+            {showBranchModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                <div className="bg-zinc-900 rounded-xl p-6 w-full max-w-lg space-y-4">
+                  <h2 className="text-xl font-light">Create a Branch</h2>
+                  <div>
+                    <label className="block text-sm text-zinc-400 mb-2">
+                      Branch Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newBranchName}
+                      onChange={(e) => setNewBranchName(e.target.value)}
+                      className="w-full bg-zinc-800 border-0 rounded-lg px-4 py-2 focus:ring-1 focus:ring-white"
+                      placeholder="Enter branch name"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={handleCancelBranch}
+                      className="px-4 py-2 rounded-lg border border-zinc-800 hover:bg-zinc-800"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleConfirmBranch}
+                      className="px-4 py-2 rounded-lg bg-white text-black hover:bg-zinc-200"
+                    >
+                      Create Branch
                     </button>
                   </div>
                 </div>
