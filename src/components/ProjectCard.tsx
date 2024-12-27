@@ -222,9 +222,3 @@ import React, { useRef, useEffect, useState } from 'react';
         </Link>
       );
     }
-       )}
-            </div>
-          </div>
-        </Link>
-      );
-    }
